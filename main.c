@@ -4,37 +4,38 @@
 #include<string.h>
 //different enums....
 typedef enum{
-    SEMI,
-    OPEN_PAREN,
-    CLOSE_PAREN,
-}TypeSeparator;
-typedef enum {
-    EXIT,
-}TypeKeyword;
-typedef enum {
     INT,
-}TypeLiteral;
-
+    KEYWORD,
+    SEPARATOR,
+}TokenType;
 
 // differnet structs....
-typedef struct{
-TypeKeyword type;
 
-}TokenKeyword;
-typedef struct{
-TypeLiteral type;
-char* value;
-}TokenLiteral;
+typedef struct {
+    TokenType type;
+    char *value;
+}Token;
+//printing tokens
+void print_token(Token token){
+    for(int i=0;token.value[i]!='\0';i++){
+   printf("%c",token.value[i]);
+    }
+    printf("\n");
+    if(token.type ==INT){
+        printf("TOKEN TYPE:INT\n");
+    }
+    if(token.type ==KEYWORD){
+        printf("TOKEN TYPE:KEYWORD\n");
+    }
+    if(token.type ==INT){
+        printf("TOKEN TYPE:SEPERATOR\n");
+    }
 
-typedef struct{
-TypeSeparator type;
-}TokenSeparator;
-
-
+}
 //for gernerating whole number
 
-TokenLiteral *generate_number(char *current, int *current_index){
-    TokenLiteral *token= malloc(sizeof(TokenLiteral)) ;
+Token *generate_number(char *current, int *current_index){
+    Token *token= malloc(sizeof(Token)) ;
     token->type =INT;
     char* value=malloc(sizeof(char)*8);
     int value_index = 0;
@@ -50,8 +51,8 @@ TokenLiteral *generate_number(char *current, int *current_index){
     return (token);
 }
 //for keywords
-TokenKeyword *generate_keyword(char *current,int *current_index){
-    TokenKeyword *token =malloc(sizeof(TokenKeyword));
+Token *generate_keyword(char *current,int *current_index){
+    Token *token =malloc(sizeof(Token));
     char* keyword= malloc(sizeof(char)*8);
     int keyword_index=0;
     while(isalpha(current[*current_index]) && current[*current_index] !='\0'){
@@ -65,7 +66,8 @@ TokenKeyword *generate_keyword(char *current,int *current_index){
     // }
     if(strcmp(keyword,"exit")==0){
         printf("TYPE EXIT\n");
-        token->type=EXIT;
+        token->type=KEYWORD;
+        token->value="EXIT";
     }
     return token;
 }
@@ -91,18 +93,25 @@ void lexer(FILE *file){
         printf("curr:%c\n",current[current_index]);
 if(current[current_index] ==';'){
     printf("FOUND SEMICOLON\n");
+    Token *semicolon_token=malloc(sizeof(Token));
+    semicolon_token->value[0] =current[current_index];
+    semicolon_token->type[1] = SEPARATOR;
+    print_token(*semicolon_token);
 }else if(current[current_index]=='('){
     printf("FOUND OPEN PAREN\n");
 }else if(current[current_index] ==')'){
     printf("FOUND CLOSE PAREN\n");
 }else if(isdigit(current[current_index])){
    // printf("FOUND DIGIT :%d\n",current-'0');
-   TokenLiteral *test_token = generate_number(current,&current_index);
-   printf("TEST TOKEN VALUE: %s\n",test_token->value);
+   Token *test_token = generate_number(current,&current_index);
+   print_token(*test_token);
+   current_index--;
+  // printf("TEST TOKEN VALUE: %s\n",test_token->value);
 }else if(isalpha(current[current_index])){
   //  printf("FOUND CHARACTER: %c\n",current);
-  TokenKeyword *test_keyword=generate_keyword(current,&current_index);
-
+  Token *test_keyword=generate_keyword(current,&current_index);
+  current_index--;
+  print_token(*test_keyword);
  //printf("FOUND char:%c\n",current[current_index]);
 }
 
